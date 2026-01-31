@@ -1,0 +1,23 @@
+# ===============================
+# Core ML & Audio Dependencies
+# ===============================
+
+torch>=2.0
+torchaudio>=2.0
+
+# Transformers for HuBERT & text emotion
+transformers>=4.38
+sentencepiece
+
+# Whisper ASR
+openai-whisper
+
+# Audio handling (Windows-safe)
+soundfile
+ffmpeg-python
+
+# Frontend
+streamlit
+
+# Utilities
+numpy
