@@ -2,19 +2,14 @@ import streamlit as st
 import tempfile
 import os
 
-from backend import (
-    transcribe_audio,
-    detect_voice_emotion,
-    detect_text_emotion,
-    fuse_emotions
-)
+from backend import run_multimodal_analysis
 
 st.set_page_config(
     page_title="Multimodal Emotion Detection",
     layout="centered"
 )
 
-st.title("🎙️ Multimodal Emotion Detection")
+st.title(" Multimodal Emotion Detection")
 st.caption("Whisper (what was said) + HuBERT (how it was said)")
 
 # -----------------------------
@@ -23,7 +18,7 @@ st.caption("Whisper (what was said) + HuBERT (how it was said)")
 
 mode = st.radio(
     "Choose input method:",
-    ["🎤 Speak (Microphone)", "📁 Upload Audio File"]
+    [" Speak (Microphone)", " Upload Audio File"]
 )
 
 audio_path = None
@@ -32,7 +27,7 @@ audio_path = None
 # MICROPHONE INPUT
 # -----------------------------
 
-if mode == "🎤 Speak (Microphone)":
+if mode == " Speak (Microphone)":
     audio_bytes = st.audio_input("Speak now")
 
     if audio_bytes is not None:
@@ -63,31 +58,32 @@ if audio_path:
     st.audio(audio_path)
 
     with st.spinner("Analyzing speech..."):
-        transcript = transcribe_audio(audio_path)
-
-        voice_label, voice_scores = detect_voice_emotion(audio_path)
-        text_label, text_scores = detect_text_emotion(transcript)
-
-        final_emotion, reasoning = fuse_emotions(
-            text_label,
-            voice_label
-        )
+        results = run_multimodal_analysis(audio_path)
 
     # -----------------------------
     # DISPLAY RESULTS
     # -----------------------------
 
-    st.subheader("📝 Transcription")
-    st.write(transcript)
+    st.subheader(" Transcription")
+    st.write(results["transcript"])
 
-    st.subheader("🗣 Voice Emotion (HuBERT)")
-    st.json(voice_scores)
+    st.subheader(" Voice Emotion (HuBERT)")
+    st.json(results["voice_scores"])
 
-    st.subheader("📖 Text Emotion")
-    st.json(text_scores)
+    st.subheader(" Text Emotion")
+    st.json(results["text_scores"])
 
-    st.subheader("🧠 Final Emotion")
-    st.success(final_emotion)
-    st.caption(reasoning)
+    st.subheader(" Acoustic Features")
+    st.json(results["features"])
+
+    st.subheader(" Session Emotion Log Length")
+    st.write(results["log_length"])
+
+    st.subheader(" Final Emotion")
+    st.success(f'{results["final_emotion"]} (confidence: {results["confidence"]})')
+    st.caption(results["reasoning"])
+
+
+
 
     os.unlink(audio_path)
